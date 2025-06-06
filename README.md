@@ -1,6 +1,6 @@
 # Lead Scraper
 
-A Python-based web scraping tool that uses Playwright to extract business listings from various business directories. Currently supports scraping from Gelbeseiten.de.
+A Python-based web scraping tool that uses Playwright to extract business listings from various business directories. Currently supports scraping from Gelbeseiten.de and Google Maps.
 
 ## Features
 
@@ -30,18 +30,24 @@ pip install -r requirements.txt
 
 ### Command Line Interface
 
-The scraper can be run from the command line with various options:
+The scraper can be run from the command line with various options.  
+**You must now specify the source with `--source` or `-s`:**
 
 ```bash
-python main.py --query "friseur" --city "berlin" --max-entries 100 --output "results.json" --proxy "http://your-proxy:8080"
+python main.py --source gelbeseiten --query "friseur" --city "berlin" --max-entries 100 --output "results.json"
+python main.py --source googlemaps --query "restaurant" --location "berlin" --radius-meters 1000 --output "results.json"
 ```
 
 Available options:
-- `--query`, `-q`: Search term (default from config)
-- `--city`, `-c`: City to search in (default from config)
+- `--source`, `-s`: Source to scrape from (`gelbeseiten` or `googlemaps`, default: `gelbeseiten`)
+- `--query`, `-q`: Search term (default from source config)
+- `--city`, `-c`: City to search in (Gelbeseiten only, default from config)
+- `--location`: Location to search in (Google Maps only, default from config)
+- `--radius-meters`: Search radius in meters (Google Maps only, default from config)
 - `--max-entries`, `-m`: Maximum number of entries to fetch (default: all available)
 - `--output`, `-o`: Output JSON file path (default: results.json)
 - `--proxy`, `-p`: Proxy server to use (default: none)
+- `--requests-per-minute`, `-r`: Rate limit in requests per minute (default: source-specific)
 
 ### Python API
 
@@ -75,11 +81,14 @@ lead-scraper/
 │   └── config.py         # General configuration
 ├── playwright_scrapers/
 │   └── scrapers/
-│       └── gelbeseiten/
-│           ├── config.py  # Gelbeseiten-specific configuration
-│           └── scraper.py # Gelbeseiten scraper implementation
-├── main.py               # Command-line interface
-└── requirements.txt      # Project dependencies
+│       ├── gelbeseiten/
+│       │   ├── config.py      # Gelbeseiten-specific configuration
+│       │   └── scraper.py     # Gelbeseiten scraper implementation
+│       └── googlemaps/
+│           ├── config.py      # Google Maps-specific configuration
+│           └── scraper.py     # Google Maps scraper implementation
+├── main.py                   # Command-line interface
+└── requirements.txt          # Project dependencies
 ```
 
 ## Configuration
@@ -134,3 +143,14 @@ All errors are logged with appropriate context for debugging.
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Upcoming: Google Maps Scraper
+
+We are planning to add a Google Maps scraper alongside the existing Gelbeseiten scraper. This will involve:
+
+- Adding a new scraper under `playwright_scrapers/scrapers/googlemaps/`.
+- Supporting Google Maps-specific configuration and arguments.
+- Updating `main.py` to allow selecting which scraper to use (e.g., via a `--source` argument).
+- Each scraper may require different CLI arguments (e.g., Google Maps may need API keys, radius, etc.).
+
+**Note:** The CLI interface will be updated to support multiple sources and their specific parameters in a user-friendly way.

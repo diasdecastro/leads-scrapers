@@ -6,6 +6,9 @@ from typing import Optional
 from .config import ScraperConfig
 from .rate_limiter import RateLimiter
 
+# Add stealth import
+from playwright_stealth import stealth_sync
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -30,7 +33,7 @@ class BrowserManager:
         self.request_count = 0
 
     def _create_context(self) -> BrowserContext:
-        """Create a new browser context with rotated user agent."""
+        """Create a new browser context with rotated user agent and stealth."""
         user_agent = random.choice(ScraperConfig.USER_AGENTS)
         context = self.browser.new_context(
             user_agent=user_agent,
@@ -42,6 +45,11 @@ class BrowserManager:
             extra_http_headers=ScraperConfig.BROWSER_HEADERS,
         )
         logger.info(f"Created new context with user agent: {user_agent}")
+        # Apply stealth to the context's page
+        page = context.new_page()
+        stealth_sync(page)
+        # Close the page after applying stealth, will be reopened in get_page
+        page.close()
         return context
 
     def get_page(self) -> Page:

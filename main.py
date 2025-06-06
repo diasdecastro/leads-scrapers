@@ -4,6 +4,8 @@ import argparse
 
 from playwright_scrapers.scrapers.gelbeseiten.scraper import GelbeseitenScraper
 from playwright_scrapers.scrapers.gelbeseiten.config import GelbeseitenConfig
+from playwright_scrapers.scrapers.googlemaps.scraper import GoogleMapsScraper
+from playwright_scrapers.scrapers.googlemaps.config import GoogleMapsConfig
 
 # Configure logging
 logging.basicConfig(
@@ -15,33 +17,19 @@ logger = logging.getLogger(__name__)
 def main():
     """Parse command line arguments and run the scraper."""
     parser = argparse.ArgumentParser(
-        description="Scrape business listings from Gelbeseiten.de"
+        description="Scrape business listings from supported sources"
     )
 
     parser.add_argument(
-        "--query",
-        "-q",
+        "--source",
+        "-s",
         type=str,
-        default=GelbeseitenConfig.DEFAULT_QUERY,
-        help=f"Search term (default: {GelbeseitenConfig.DEFAULT_QUERY})",
+        choices=["gelbeseiten", "googlemaps"],
+        default="gelbeseiten",
+        help="Source to scrape from: 'gelbeseiten' or 'googlemaps' (default: gelbeseiten)",
     )
 
-    parser.add_argument(
-        "--city",
-        "-c",
-        type=str,
-        default=GelbeseitenConfig.DEFAULT_CITY,
-        help=f"City to search in (default: {GelbeseitenConfig.DEFAULT_CITY})",
-    )
-
-    parser.add_argument(
-        "--max-entries",
-        "-m",
-        type=int,
-        default=None,
-        help="Maximum number of entries to fetch (default: all available)",
-    )
-
+    # Common arguments
     parser.add_argument(
         "--output",
         "-o",
@@ -49,15 +37,13 @@ def main():
         default="results.json",
         help="Output JSON file path (default: results.json)",
     )
-
     parser.add_argument(
         "--requests-per-minute",
         "-r",
         type=int,
-        default=GelbeseitenConfig.REQUESTS_PER_MINUTE,
-        help=f"Rate limit in requests per minute (default: {GelbeseitenConfig.REQUESTS_PER_MINUTE})",
+        default=None,
+        help="Rate limit in requests per minute (default: source-specific)",
     )
-
     parser.add_argument(
         "--proxy",
         "-p",
@@ -66,16 +52,64 @@ def main():
         help="Proxy server to use (default: none)",
     )
 
+    # Gelbeseiten arguments
+    parser.add_argument(
+        "--query",
+        "-q",
+        type=str,
+        help="Search term (default: source-specific)",
+    )
+    parser.add_argument(
+        "--city",
+        "-c",
+        type=str,
+        help="City to search in (default: source-specific)",
+    )
+    parser.add_argument(
+        "--max-entries",
+        "-m",
+        type=int,
+        help="Maximum number of entries to fetch (default: all available)",
+    )
+
+    # Google Maps arguments
+    parser.add_argument(
+        "--location",
+        type=str,
+        help="Location to search in (Google Maps only, default: source-specific)",
+    )
+    parser.add_argument(
+        "--radius-meters",
+        type=int,
+        help="Search radius in meters (Google Maps only, default: source-specific)",
+    )
+
     args = parser.parse_args()
 
     try:
-        # Initialize and run scraper
-        scraper = GelbeseitenScraper(
-            requests_per_minute=args.requests_per_minute, proxy=args.proxy
-        )
-        results = scraper.scrape(
-            query=args.query, city=args.city, max_entries=args.max_entries
-        )
+        if args.source == "gelbeseiten":
+            scraper = GelbeseitenScraper(
+                requests_per_minute=args.requests_per_minute or GelbeseitenConfig.REQUESTS_PER_MINUTE,
+                proxy=args.proxy,
+            )
+            results = scraper.scrape(
+                query=args.query or GelbeseitenConfig.DEFAULT_QUERY,
+                city=args.city or GelbeseitenConfig.DEFAULT_CITY,
+                max_entries=args.max_entries,
+            )
+        elif args.source == "googlemaps":
+            scraper = GoogleMapsScraper(
+                requests_per_minute=args.requests_per_minute or GoogleMapsConfig.REQUESTS_PER_MINUTE,
+                proxy=args.proxy,
+            )
+            results = scraper.scrape(
+                query=args.query or GoogleMapsConfig.DEFAULT_QUERY,
+                location=args.location or GoogleMapsConfig.DEFAULT_LOCATION,
+                radius_meters=args.radius_meters or GoogleMapsConfig.DEFAULT_RADIUS_METERS,
+                max_entries=args.max_entries,
+            )
+        else:
+            raise ValueError("Unknown source selected.")
 
         # Save results
         with open(args.output, "w", encoding="utf-8") as f:
