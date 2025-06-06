@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+import base64
 from typing import List, Dict, Optional
 
 from config.browser import BrowserManager
@@ -79,75 +80,75 @@ class GelbeseitenScraper:
             current_position = initial_entries
             ENTRIES_PER_REQUEST = 10  # Gelbeseiten only allows 10 entries per request
 
-            while remaining_entries > 0:
-                # Calculate entries to fetch in this batch
-                batch_size = min(ENTRIES_PER_REQUEST, remaining_entries)
+            # while remaining_entries > 0:
+            #     # Calculate entries to fetch in this batch
+            #     batch_size = min(ENTRIES_PER_REQUEST, remaining_entries)
 
-                # Prepare form data for the batch request
-                form_data = {
-                    "umkreis": "-1",
-                    "verwandt": "false",
-                    "WAS": query,
-                    "WO": city,
-                    "position": str(current_position),
-                    "startIndex": str(current_position),
-                    "anzahl": str(batch_size),
-                }
+            #     # Prepare form data for the batch request
+            #     form_data = {
+            #         "umkreis": "-1",
+            #         "verwandt": "false",
+            #         "WAS": query,
+            #         "WO": city,
+            #         "position": str(current_position),
+            #         "startIndex": str(current_position),
+            #         "anzahl": str(batch_size),
+            #     }
 
-                logger.info(
-                    f"Requesting batch of {batch_size} entries starting from position {current_position}"
-                )
+            #     logger.info(
+            #         f"Requesting batch of {batch_size} entries starting from position {current_position}"
+            #     )
 
-                # Send the POST request and get the response
-                response = page.evaluate(
-                    """async ([formData, baseUrl]) => {
-                    const response = await fetch(baseUrl + '/ajaxsuche', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: new URLSearchParams(formData)
-                    });
-                    return await response.json();
-                }""",
-                    [form_data, base_url],
-                )
+            #     # Send the POST request and get the response
+            #     response = page.evaluate(
+            #         """async ([formData, baseUrl]) => {
+            #         const response = await fetch(baseUrl + '/ajaxsuche', {
+            #             method: 'POST',
+            #             headers: {
+            #                 'Content-Type': 'application/x-www-form-urlencoded',
+            #                 'Accept': 'application/json',
+            #                 'X-Requested-With': 'XMLHttpRequest'
+            #             },
+            #             body: new URLSearchParams(formData)
+            #         });
+            #         return await response.json();
+            #     }""",
+            #         [form_data, base_url],
+            #     )
 
-                if response and "wipePageItemsJson" in response:
-                    try:
-                        # Parse the JSON string containing the entries
-                        new_entries = json.loads(response["wipePageItemsJson"])
-                        logger.info(f"Received {len(new_entries)} new entries")
+            #     if response and "wipePageItemsJson" in response:
+            #         try:
+            #             # Parse the JSON string containing the entries
+            #             new_entries = json.loads(response["wipePageItemsJson"])
+            #             logger.info(f"Received {len(new_entries)} new entries")
 
-                        if len(new_entries) == 0:
-                            logger.info("No more entries available")
-                            break
+            #             if len(new_entries) == 0:
+            #                 logger.info("No more entries available")
+            #                 break
 
-                        # Process each entry
-                        for entry in new_entries:
-                            company = {
-                                "name": entry["na"],
-                                "id": entry["id"],
-                                "position": entry["pos"],
-                                "industry": query.capitalize(),
-                            }
-                            results.append(company)
-                            logger.info(
-                                f"Processed entry {len(results)}/{max_entries}: {company['name']}"
-                            )
+            #             # Process each entry
+            #             for entry in new_entries:
+            #                 company = {
+            #                     "name": entry["na"],
+            #                     "id": entry["id"],
+            #                     "position": entry["pos"],
+            #                     "industry": query.capitalize(),
+            #                 }
+            #                 results.append(company)
+            #                 logger.info(
+            #                     f"Processed entry {len(results)}/{max_entries}: {company['name']}"
+            #                 )
 
-                        # Update counters
-                        current_position += len(new_entries)
-                        remaining_entries -= len(new_entries)
+            #             # Update counters
+            #             current_position += len(new_entries)
+            #             remaining_entries -= len(new_entries)
 
-                    except json.JSONDecodeError as e:
-                        logger.error(f"Error parsing JSON response: {e}")
-                        break
-                else:
-                    logger.error("Invalid response format")
-                    break
+            #         except json.JSONDecodeError as e:
+            #             logger.error(f"Error parsing JSON response: {e}")
+            #             break
+            #     else:
+            #         logger.error("Invalid response format")
+            #         break
 
             logger.info(f"Finished scraping. Total entries collected: {len(results)}")
             return results
@@ -166,11 +167,24 @@ class GelbeseitenScraper:
                 name = entry.query_selector(
                     GelbeseitenConfig.SELECTORS["company_name"]
                 ).text_content()
+
+                url_container = entry.query_selector(
+                    GelbeseitenConfig.SELECTORS["company_website"]
+                )
+
+                if url_container:
+                    url_encoded = url_container.get_attribute("data-webseitelink")
+                    url_decoded = base64.b64decode(url_encoded).decode("utf-8")
+                else:
+                    # Some entries may not have a website, handle this case
+                    url_decoded = ""
+
                 company = {
                     "name": name.strip(),
-                    "id": entry.get_attribute("data-id"),
                     "position": idx,
                     "industry": page.url.split("/")[-2].capitalize(),
+                    "city": page.url.split("/")[-1].capitalize(),
+                    "url": url_decoded,
                 }
                 results.append(company)
                 logger.info(f"Processed entry {idx}/{total_entries}: {company['name']}")
