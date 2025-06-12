@@ -1,3 +1,5 @@
 playwright
 tqdm
 playwright-stealth
+mysql-connector-python
+python-dotenv

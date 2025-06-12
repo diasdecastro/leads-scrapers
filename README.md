@@ -34,15 +34,14 @@ The scraper can be run from the command line with various options.
 **You must now specify the source with `--source` or `-s`:**
 
 ```bash
-python main.py --source gelbeseiten --query "friseur" --city "berlin" --max-entries 100 --output "results.json"
-python main.py --source googlemaps --query "restaurant" --location "berlin" --radius-meters 1000 --output "results.json"
+python main.py --source gelbeseiten --query "friseur" --location "berlin" --max-entries 100 --output "results.json"
+python main.py --source googlemaps --query "restaurant" --location "berlin" --max-entries 15 --radius-meters 1000 --output "results.json"
 ```
 
 Available options:
 - `--source`, `-s`: Source to scrape from (`gelbeseiten` or `googlemaps`, default: `gelbeseiten`)
 - `--query`, `-q`: Search term (default from source config)
-- `--city`, `-c`: City to search in (Gelbeseiten only, default from config)
-- `--location`: Location to search in (Google Maps only, default from config)
+- `--location`: Location to search in
 - `--radius-meters`: Search radius in meters (Google Maps only, default from config)
 - `--max-entries`, `-m`: Maximum number of entries to fetch (default: all available)
 - `--output`, `-o`: Output JSON file path (default: results.json)

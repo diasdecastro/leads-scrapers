@@ -1,4 +1,3 @@
-import json
 import logging
 import base64
 from typing import List, Dict, Optional
@@ -27,12 +26,12 @@ class GelbeseitenScraper:
     def scrape(
         self,
         query: str = GelbeseitenConfig.DEFAULT_QUERY,
-        city: str = GelbeseitenConfig.DEFAULT_CITY,
+        location: str = GelbeseitenConfig.DEFAULT_CITY,
         max_entries: Optional[int] = None,
     ) -> List[Dict]:
         """Scrape business listings from Gelbeseiten.de."""
         base_url = "https://www.gelbeseiten.de"
-        url = f"{base_url}/{query}/{city}"
+        url = f"{base_url}/{query}/{location}"
         results = []
 
         with BrowserManager(self.requests_per_minute, self.proxy) as browser:
@@ -89,7 +88,7 @@ class GelbeseitenScraper:
                     "umkreis": "-1",
                     "verwandt": "false",
                     "WAS": query,
-                    "WO": city,
+                    "WO": location,
                     "position": str(current_position),
                     "startIndex": str(current_position),
                     "anzahl": str(batch_size),
@@ -112,9 +111,7 @@ class GelbeseitenScraper:
                             break
 
                         results.extend(new_entries)
-                        logger.info(
-                            f"Processed entries {len(results)}/{max_entries}"
-                        )
+                        logger.info(f"Processed entries {len(results)}/{max_entries}")
 
                         # Update counters
                         current_position += len(new_entries)
@@ -158,28 +155,32 @@ class GelbeseitenScraper:
             }""",
             {
                 "html": html_string,
-                "selector": GelbeseitenConfig.SELECTORS["company_article"]
-            }
+                "selector": GelbeseitenConfig.SELECTORS["company_article"],
+            },
         )
-        industry = page.url.split("/")[-2].capitalize()
-        city = page.url.split("/")[-1].capitalize()
+        search_query = page.url.split("/")[-2].capitalize()
+        location = page.url.split("/")[-1].capitalize()
         return [
             self._extract_company_from_html(
-                page, entry_html, idx, current_position, industry, city
+                page, entry_html, idx, current_position, search_query, location
             )
             for idx, entry_html in enumerate(entry_html_list, 1)
         ]
 
-    def _extract_company_from_html(self, page, entry_html, idx, current_position, industry, city):
+    def _extract_company_from_html(
+        self, page, entry_html, idx, current_position, search_query, location
+    ):
         """Extract a single company from an HTML string using Playwright JS evaluation."""
         return page.evaluate(
             """(args) => {
-                const { entryHtml, idx, currentPosition, industry, city, selectors } = args;
+                const { entryHtml, idx, currentPosition, search_query, location, selectors } = args;
                 const temp = document.createElement('div');
                 temp.innerHTML = entryHtml;
                 const entry = temp.firstElementChild;
                 let name = '';
                 let url_decoded = '';
+                let address = '';
+                let phone = '';
                 try {
                     name = entry.querySelector(selectors.company_name).textContent.trim();
                 } catch {}
@@ -187,24 +188,45 @@ class GelbeseitenScraper:
                     const url_container = entry.querySelector(selectors.company_website);
                     if (url_container) {
                         const url_encoded = url_container.getAttribute('data-webseitelink');
-                        url_decoded = atob(url_encoded);
+                        url_decoded = url_encoded ? atob(url_encoded) : '';
                     }
+                } catch {}
+                try {
+                    const address_elem = entry.querySelector(selectors.company_address);
+                    if (address_elem) {
+                        const address_lines = address_elem.textContent.split('\\n').map(l => l.trim()).filter(Boolean);
+                        let address_parts = [];
+                        if (address_lines.length > 0) {
+                            address_parts.push(address_lines[0]);
+                        }
+                        if (address_lines.length > 1) {
+                            const postal_location = address_lines[1].split(',')[0].trim();
+                            address_parts.push(postal_location);
+                        }
+                        address = address_parts.join(', ').replace(',,', ',').replace(', ,', ',').trim();
+                    }
+                } catch {}
+                try {
+                    const phone_elem = entry.querySelector(selectors.company_phone);
+                    phone = phone_elem ? phone_elem.textContent.trim() : '';
                 } catch {}
                 return {
                     name,
-                    industry,
-                    city,
-                    url: url_decoded
+                    search_query,
+                    url: url_decoded,
+                    address,
+                    phone,
+                    source: "gelbeseiten.de",
                 };
             }""",
             {
                 "entryHtml": entry_html,
                 "idx": idx,
                 "currentPosition": current_position,
-                "industry": industry,
-                "city": city,
-                "selectors": GelbeseitenConfig.SELECTORS
-            }
+                "search_query": search_query,
+                "location": location,
+                "selectors": GelbeseitenConfig.SELECTORS,
+            },
         )
 
     def _extract_entries(self, page) -> List[Dict]:
@@ -232,30 +254,39 @@ class GelbeseitenScraper:
                 else:
                     url_decoded = ""
 
-                address_elem = entry.query_selector(GelbeseitenConfig.SELECTORS["company_address"])
+                address_elem = entry.query_selector(
+                    GelbeseitenConfig.SELECTORS["company_address"]
+                )
                 if address_elem:
-                    address_lines = [line.strip() for line in address_elem.text_content().splitlines() if line.strip()]
+                    address_lines = [
+                        line.strip()
+                        for line in address_elem.text_content().splitlines()
+                        if line.strip()
+                    ]
                     address_parts = []
                     if len(address_lines) > 0:
                         address_parts.append(address_lines[0])
                     if len(address_lines) > 1:
-                        postal_city = address_lines[1].split(",")[0].strip()
-                        address_parts.append(postal_city)
+                        postal_location = address_lines[1].split(",")[0].strip()
+                        address_parts.append(postal_location)
                     address = ", ".join(address_parts)
                     address = address.replace(",,", ",").replace(", ,", ",").strip()
                 else:
                     address = ""
 
                 # Extract phone number
-                phone_elem = entry.query_selector(GelbeseitenConfig.SELECTORS["company_phone"])
+                phone_elem = entry.query_selector(
+                    GelbeseitenConfig.SELECTORS["company_phone"]
+                )
                 phone = phone_elem.text_content().strip() if phone_elem else ""
 
                 company = {
                     "name": name.strip(),
-                    "industry": page.url.split("/")[-2].capitalize(),
+                    "search_query": page.url.split("/")[-2].capitalize(),
                     "url": url_decoded,
                     "address": address,
-                    "phone": phone
+                    "phone": phone,
+                    "source": "gelbeseiten.de",
                 }
                 results.append(company)
                 logger.info(f"Processed entry {idx}/{total_entries}: {company['name']}")

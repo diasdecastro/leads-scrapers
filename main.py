@@ -1,11 +1,14 @@
 import json
 import logging
 import argparse
+import os
+from dotenv import load_dotenv
 
 from playwright_scrapers.scrapers.gelbeseiten.scraper import GelbeseitenScraper
 from playwright_scrapers.scrapers.gelbeseiten.config import GelbeseitenConfig
 from playwright_scrapers.scrapers.googlemaps.scraper import GoogleMapsScraper
 from playwright_scrapers.scrapers.googlemaps.config import GoogleMapsConfig
+from utils.db import insert_business, get_connection  # add get_connection import
 
 # Configure logging
 logging.basicConfig(
@@ -15,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 def main():
+    load_dotenv()  # Load .env variables before accessing them
+
     """Parse command line arguments and run the scraper."""
     parser = argparse.ArgumentParser(
         description="Scrape business listings from supported sources"
@@ -60,10 +65,9 @@ def main():
         help="Search term (default: source-specific)",
     )
     parser.add_argument(
-        "--city",
-        "-c",
+        "--location",
         type=str,
-        help="City to search in (default: source-specific)",
+        help="Location to search in (default: source-specific)",
     )
     parser.add_argument(
         "--max-entries",
@@ -73,11 +77,6 @@ def main():
     )
 
     # Google Maps arguments
-    parser.add_argument(
-        "--location",
-        type=str,
-        help="Location to search in (Google Maps only, default: source-specific)",
-    )
     parser.add_argument(
         "--radius-meters",
         type=int,
@@ -89,35 +88,56 @@ def main():
     try:
         if args.source == "gelbeseiten":
             scraper = GelbeseitenScraper(
-                requests_per_minute=args.requests_per_minute or GelbeseitenConfig.REQUESTS_PER_MINUTE,
+                requests_per_minute=args.requests_per_minute
+                or GelbeseitenConfig.REQUESTS_PER_MINUTE,
                 proxy=args.proxy,
             )
             results = scraper.scrape(
                 query=args.query or GelbeseitenConfig.DEFAULT_QUERY,
-                city=args.city or GelbeseitenConfig.DEFAULT_CITY,
+                location=args.location or GelbeseitenConfig.DEFAULT_CITY,
                 max_entries=args.max_entries,
             )
         elif args.source == "googlemaps":
             scraper = GoogleMapsScraper(
-                requests_per_minute=args.requests_per_minute or GoogleMapsConfig.REQUESTS_PER_MINUTE,
+                requests_per_minute=args.requests_per_minute
+                or GoogleMapsConfig.REQUESTS_PER_MINUTE,
                 proxy=args.proxy,
             )
             results = scraper.scrape(
                 query=args.query or GoogleMapsConfig.DEFAULT_QUERY,
                 location=args.location or GoogleMapsConfig.DEFAULT_LOCATION,
-                radius_meters=args.radius_meters or GoogleMapsConfig.DEFAULT_RADIUS_METERS,
+                radius_meters=args.radius_meters
+                or GoogleMapsConfig.DEFAULT_RADIUS_METERS,
                 max_entries=args.max_entries,
             )
         else:
             raise ValueError("Unknown source selected.")
 
-        # Save results
-        with open(args.output, "w", encoding="utf-8") as f:
-            json.dump(results, f, indent=2, ensure_ascii=False)
+        # Save to database in a transaction
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            for entry in results:
+                insert_business(entry, conn=conn, cursor=cursor)
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
 
-        logger.info(
-            f"Successfully scraped {len(results)} entries. Results saved to {args.output}"
-        )
+        # Save results to file only if output flag is present
+        if args.output:
+            with open(args.output, "w", encoding="utf-8") as f:
+                json.dump(results, f, indent=2, ensure_ascii=False)
+            logger.info(
+                f"Successfully scraped {len(results)} entries. Results saved to {args.output}"
+            )
+        else:
+            logger.info(
+                f"Successfully scraped {len(results)} entries. Results saved to database."
+            )
 
     except Exception as e:
         logger.error(f"Error during scraping: {e}")
