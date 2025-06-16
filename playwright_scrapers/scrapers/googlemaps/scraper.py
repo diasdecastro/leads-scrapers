@@ -73,6 +73,10 @@ class GoogleMapsScraper:
                         )
                         if address_btn:
                             address = address_btn.get_attribute("aria-label") or ""
+                            # Remove "Adresse: " prefix if present
+                            if address.startswith("Adresse: "):
+                                address = address[len("Adresse: ") :]
+                            address = address.strip()
                     except Exception:
                         address = ""
 

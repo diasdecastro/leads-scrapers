@@ -34,11 +34,14 @@ The scraper can be run from the command line with various options.
 **You must now specify the source with `--source` or `-s`:**
 
 ```bash
-python main.py --source gelbeseiten --query "friseur" --location "berlin" --max-entries 100 --output "results.json"
-python main.py --source googlemaps --query "restaurant" --location "berlin" --max-entries 15 --radius-meters 1000 --output "results.json"
+python main.py scrape --source gelbeseiten --query "friseur" --location "berlin" --max-entries 400 --output "results_gs.json"
+python main.py scrape --source googlemaps --query "restaurant" --location "berlin" --max-entries 15 --radius-meters 1000 --output "results_gm.json"
+python main.py enrich-bundesanzeiger --limit 100
 ```
 
 Available options:
+- `scrape`: Scrape business listings (default command)
+- `enrich-bundesanzeiger`: Enrich companies in the database with Bundesanzeiger API data
 - `--source`, `-s`: Source to scrape from (`gelbeseiten` or `googlemaps`, default: `gelbeseiten`)
 - `--query`, `-q`: Search term (default from source config)
 - `--location`: Location to search in
@@ -47,6 +50,7 @@ Available options:
 - `--output`, `-o`: Output JSON file path (default: results.json)
 - `--proxy`, `-p`: Proxy server to use (default: none)
 - `--requests-per-minute`, `-r`: Rate limit in requests per minute (default: source-specific)
+- `--limit`: (for `enrich-bundesanzeiger`) Number of companies to enrich (default: 50)
 
 ### Python API
 
@@ -153,3 +157,28 @@ We are planning to add a Google Maps scraper alongside the existing Gelbeseiten 
 - Each scraper may require different CLI arguments (e.g., Google Maps may need API keys, radius, etc.).
 
 **Note:** The CLI interface will be updated to support multiple sources and their specific parameters in a user-friendly way.
+
+# Interessante Queries
+| Branche                       | Begründung                                         |
+| ----------------------------- | -------------------------------------------------- |
+| **Steuerberater**             | oft mehrere Angestellte, gut verdienend            |
+| **Hausverwaltungen**          | viele Objekte = hoher Umsatz                       |
+| **Pflegedienste**             | Personalintensiv, oft >20 MA                       |
+| **Physiotherapie-Zentren**    | >10 MA häufig bei großen Praxen                    |
+| **Autohäuser & Werkstätten**  | ab 2 Hebebühnen meist >10 MA                       |
+| **Bauunternehmen**            | Umsatz meist >2 Mio bei >3 Baustellen gleichzeitig |
+| **Sanitär & Heizung**         | viele Installateure = viele MA                     |
+| **Rechtsanwälte (Kanzleien)** | große Kanzleien mit mehreren Anwälten              |
+| **Logistik / Speditionen**    | fast immer mittelständisch                         |
+| **IT-Systemhäuser**           | Software, Netzwerke, Wartung = >10 MA üblich       |
+| **Maschinenbau / Produktion** | hohe Fixkosten → hoher Umsatz                      |
+
+## Enrichment with Bundesanzeiger API
+
+You can enrich your scraped company data with official information from the Bundesanzeiger using:
+
+```bash
+python main.py enrich-bundesanzeiger --limit 100
+```
+
+This will attempt to match and enrich up to 100 companies in your database with data such as revenue, employee count, and more, using the Bundesanzeiger API.

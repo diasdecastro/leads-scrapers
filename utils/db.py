@@ -10,6 +10,26 @@ COLUMNS = {
     "source": "VARCHAR(100)",
 }
 
+ENRICHED_COLUMNS = {
+    "company_id": "INT PRIMARY KEY",  # FK to raw_companies.id
+    "source": "VARCHAR(100)",
+    "url": "VARCHAR(512)",
+    "mitarbeiter_min": "INT",
+    "mitarbeiter_max": "INT",
+    "umsatz_mio": "DECIMAL(10,2)",
+    "bilanzsumme_mio": "DECIMAL(10,2)",
+    "rechtsform": "VARCHAR(50)",
+    "publikationsdatum": "DATE",
+    "sitz": "VARCHAR(100)",
+    "branche": "VARCHAR(255)",
+    "wz_code": "VARCHAR(20)",
+    "geschaeftsfuehrer": "TEXT",
+    "eigentuemer": "TEXT",
+    "confidence_score": "TINYINT UNSIGNED",
+    "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+    "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+}
+
 
 def get_connection():
     DB_CONFIG = {
@@ -23,13 +43,13 @@ def get_connection():
     return mysql.connector.connect(**DB_CONFIG)
 
 
-def create_table():
+def create_raw_companies_table():
     conn = get_connection()
     cursor = conn.cursor()
     columns_sql = ",\n".join([f"{col} {typ}" for col, typ in COLUMNS.items()])
     cursor.execute(
         f"""
-        CREATE TABLE IF NOT EXISTS businesses (
+        CREATE TABLE IF NOT EXISTS raw_companies (
             id INT AUTO_INCREMENT PRIMARY KEY,
             {columns_sql},
             UNIQUE KEY unique_business (name, address)
@@ -41,19 +61,19 @@ def create_table():
     conn.close()
 
 
-def insert_business(business, conn=None, cursor=None):
+def insert_raw_company(business, conn=None, cursor=None):
     close_conn = False
     if conn is None or cursor is None:
         conn = get_connection()
         cursor = conn.cursor()
         close_conn = True
-    create_table()
+    create_raw_companies_table()
     keys = list(COLUMNS.keys())
     values = [business.get(k) for k in keys]
     placeholders = ", ".join(["%s"] * len(keys))
     columns_sql = ", ".join(keys)
     sql = f"""
-        INSERT IGNORE INTO businesses ({columns_sql})
+        INSERT IGNORE INTO raw_companies ({columns_sql})
         VALUES ({placeholders})
     """
     cursor.execute(sql, values)
@@ -63,11 +83,62 @@ def insert_business(business, conn=None, cursor=None):
         conn.close()
 
 
-def get_all_businesses():
+def get_all_raw_companies():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM businesses")
+    cursor.execute("SELECT * FROM raw_companies")
     results = cursor.fetchall()
     cursor.close()
     conn.close()
     return results
+
+
+def create_enriched_companies_table():
+    conn = get_connection()
+    cursor = conn.cursor()
+    columns_sql = ",\n".join([f"{col} {typ}" for col, typ in ENRICHED_COLUMNS.items()])
+    cursor.execute(
+        f"""
+        CREATE TABLE IF NOT EXISTS enriched_companies (
+            {columns_sql},
+            CONSTRAINT fk_enriched_company FOREIGN KEY (company_id)
+                REFERENCES raw_companies(id)
+                ON DELETE CASCADE
+        )
+        """
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+def insert_enriched_company(enrichment, conn=None, cursor=None):
+    close_conn = False
+    if conn is None or cursor is None:
+        conn = get_connection()
+        cursor = conn.cursor()
+        close_conn = True
+    create_enriched_companies_table()
+
+    keys = list(ENRICHED_COLUMNS.keys())
+    # Remove TIMESTAMP-Felder (werden automatisch gesetzt)
+    keys = [
+        k
+        for k in keys
+        if not k.startswith("created_at") and not k.startswith("updated_at")
+    ]
+    values = [enrichment.get(k) for k in keys]
+    placeholders = ", ".join(["%s"] * len(keys))
+    columns_sql = ", ".join(keys)
+
+    sql = f"""
+        INSERT INTO enriched_companies ({columns_sql})
+        VALUES ({placeholders})
+        ON DUPLICATE KEY UPDATE
+            {", ".join([f"{k}=VALUES({k})" for k in keys if k != "company_id"])}
+    """
+    cursor.execute(sql, values)
+    if close_conn:
+        conn.commit()
+        cursor.close()
+        conn.close()

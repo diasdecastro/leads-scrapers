@@ -3,3 +3,6 @@ tqdm
 playwright-stealth
 mysql-connector-python
 python-dotenv
+deutschland
+setuptools
+rapidfuzz
