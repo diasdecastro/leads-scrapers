@@ -1,6 +1,8 @@
 import mysql.connector
 import os
 
+# TODO: Denk darüber nach, ob die DB-Konfiguration eine Klasse sein sollte,
+
 COLUMNS = {
     "name": "VARCHAR(255)",
     "search_query": "VARCHAR(255)",
@@ -12,12 +14,10 @@ COLUMNS = {
 
 ENRICHED_COLUMNS = {
     "company_id": "INT PRIMARY KEY",  # FK to raw_companies.id
-    "source": "VARCHAR(100)",
     "url": "VARCHAR(512)",
-    "mitarbeiter_min": "INT",
-    "mitarbeiter_max": "INT",
-    "umsatz_mio": "DECIMAL(10,2)",
-    "bilanzsumme_mio": "DECIMAL(10,2)",
+    "mitarbeiter": "INT",
+    "umsatz": "DECIMAL(10,2)",
+    "bilanzsumme": "DECIMAL(10,2)",
     "rechtsform": "VARCHAR(50)",
     "publikationsdatum": "DATE",
     "sitz": "VARCHAR(100)",
@@ -25,7 +25,6 @@ ENRICHED_COLUMNS = {
     "wz_code": "VARCHAR(20)",
     "geschaeftsfuehrer": "TEXT",
     "eigentuemer": "TEXT",
-    "confidence_score": "TINYINT UNSIGNED",
     "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
     "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
 }
@@ -118,6 +117,7 @@ def insert_enriched_company(enrichment, conn=None, cursor=None):
         conn = get_connection()
         cursor = conn.cursor()
         close_conn = True
+
     create_enriched_companies_table()
 
     keys = list(ENRICHED_COLUMNS.keys())
@@ -142,3 +142,37 @@ def insert_enriched_company(enrichment, conn=None, cursor=None):
         conn.commit()
         cursor.close()
         conn.close()
+
+
+def get_company_name_by_id(company_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM raw_companies WHERE id = %s", (company_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if result:
+        return result[0]
+    return None
+
+
+def get_company_id_by_name(company_name):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM raw_companies WHERE name = %s", (company_name,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if result:
+        return result[0]
+    return None
+
+
+def get_all_company_names():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM raw_companies")
+    results = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return [{"id": row[0], "name": row[1]} for row in results]

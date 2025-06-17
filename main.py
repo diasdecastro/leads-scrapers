@@ -8,8 +8,12 @@ from playwright_scrapers.scrapers.gelbeseiten.scraper import GelbeseitenScraper
 from playwright_scrapers.scrapers.gelbeseiten.config import GelbeseitenConfig
 from playwright_scrapers.scrapers.googlemaps.scraper import GoogleMapsScraper
 from playwright_scrapers.scrapers.googlemaps.config import GoogleMapsConfig
-from utils.db import insert_raw_company, get_connection  # add get_connection import
-from apis.bundesanzeiger import run_enrichment  # add this import
+from utils.db import (
+    get_all_company_names,
+    insert_raw_company,
+    get_connection,
+)  # add get_connection import
+from apis.bundesanzeiger import BundesanzeigerScraper  # add this import
 
 # Configure logging
 logging.basicConfig(
@@ -101,12 +105,23 @@ def main():
 
     if args.command == "enrich-bundesanzeiger":
         if getattr(args, "test", False):
-            from apis.bundesanzeiger import test_enrich_deutsche_bahn
-
-            test_enrich_deutsche_bahn()
+            scraper = BundesanzeigerScraper()
+            scraper.store_report_data_to_db("RED AG")
         else:
-            run_enrichment(limit=args.limit)
-        return
+            rows = get_all_company_names()
+            if not rows:
+                logger.warning("No companies found in the database to enrich.")
+                return
+            company_names = [row["name"] for row in rows]
+            if not company_names:
+                logger.warning("No companies found to enrich.")
+                return
+            logger.info(
+                f"Enriching {len(company_names)} companies with Bundesanzeiger data..."
+            )
+            # Initialize BundesanzeigerScraper and store data to DB
+            scraper = BundesanzeigerScraper()
+            scraper.store_report_data_to_db(([row["name"] for row in rows]))
 
     # Default to scrape if no command is given (for backward compatibility)
     if args.command is None or args.command == "scrape":

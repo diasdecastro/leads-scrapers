@@ -1,185 +1,202 @@
 import re
+from typing import Optional
 from deutschland import bundesanzeiger
-from rapidfuzz.fuzz import ratio
-from utils.db import get_all_raw_companies, insert_enriched_company
-from datetime import datetime
+import json
+import time
+
+from utils.db import get_company_id_by_name, insert_enriched_company
+import os
 
 
-class BundesanzeigerEnricher:
-    def __init__(self):
-        self.ba = bundesanzeiger.Bundesanzeiger()
+class BundesanzeigerScraper:
+    @staticmethod
+    def normalize_number(raw: str) -> float:
+        """
+        Konvertiert z. B. "695.263,86" → 695263.86
+        """
+        raw = raw.replace(".", "").replace(",", ".")
+        return float(raw)
 
-    def is_relevant_report(self, entry):
-        title = entry.get("name", "")
-        if not title:
-            return False
-
-        title_lower = title.lower()
-        relevant_keywords = [
-            "jahresabschluss",
-            "konzernabschluss",
-            "lagebericht",
-            "bilanz zum",
-            "abschluss zum",
-            "gewinn- und verlustrechnung",
-            "jahresabschluss zum geschäftsjahr",
-        ]
-
-        return any(keyword in title_lower for keyword in relevant_keywords)
-
-    def generate_search_variants(self, name: str) -> list[str]:
-        clean = name.lower()
-        for pattern in [
-            r"\b(gmbh & co\. kg|gesellschaft mit beschränkter haftung|gmbh|ag|kg|mbh)\b",
-            r"[,|\(].*",
-        ]:
-            clean = re.sub(pattern, "", clean)
-        clean = re.sub(r"\s+", " ", clean).strip()
-        variants = list(
-            set(
-                [
-                    name.strip(),
-                    clean.title(),
-                    clean.upper(),
-                    clean.replace(" ", ""),
-                    clean.split()[0],
-                ]
-            )
-        )
-        return variants
-
-    def find_best_report_entry(self, company_name: str) -> dict | None:
-        search_variants = self.generate_search_variants(company_name)
-        best_entry = None
-        best_score = 0
-
-        for variant in search_variants:
-            try:
-                reports = self.ba.get_reports(variant)
-            except Exception as e:
-                print(f"Fehler bei get_reports('{variant}'): {e}")
-                continue
-
-            if not isinstance(reports, dict):
-                print(f"⚠️ Keine gültigen Reports für '{variant}'")
-                continue
-
-            for _, entry in reports.items():
-                if not self.is_relevant_report(entry):
-                    continue
-                title = entry.get("name", "")
-                company_in_report = entry.get("company", "")
-                score_title = ratio(company_name.lower(), title.lower())
-                score_company = ratio(company_name.lower(), company_in_report.lower())
-                score = max(score_title, score_company)
-
-                print(f"→ Kandidat: {title} ({company_in_report}) | Score: {score}")
-
-                if score > best_score:
-                    best_score = score
-                    best_entry = entry
-
-        return best_entry if best_score >= 75 else None
-
-    def extract_financial_data(self, text: str):
+    @staticmethod
+    def extract_bilanzsumme(text: str) -> Optional[float]:
+        """
+        Sucht nach der Bilanzsumme auf der Aktiv-/Passivseite
+        """
         text = text.lower()
-        umsatz = None
-        mitarbeiter = None
 
-        umsatz_patterns = [
-            r"umsatz[^0-9]{0,20}([\d\.,]+)\s*(mio|millionen|mrd|milliarden)?",
-            r"gesamterlöse[^0-9]{0,20}([\d\.,]+)\s*(mio|millionen|mrd|milliarden)?",
+        patterns = [
+            # 1. klassische Formulierungen
+            r"summe\s+(aktiva|passiva)[^\d]{0,20}([\d\.,]+)",
+            # 2. Kompakte Textform mit beiden Summen
+            r"aktiva\s+[\d\.,]+\s+passiva\s+([\d\.,]+)",
+            # 3. Nur "passiva" mit Wert
+            r"passiva\s+([\d\.,]+)",
+            # 4. neue: explizite AKTIVA-Zeile mit Zahl (z. B. "aktiva\n...48.670.387,13")
+            r"aktiva[^\d]{0,20}([\d\.,]{6,})",
+            # 5. neue: explizite PASSIVA-Zeile mit Zahl
+            r"passiva[^\d]{0,20}([\d\.,]{6,})",
         ]
-        for pattern in umsatz_patterns:
+
+        for pattern in patterns:
             match = re.search(pattern, text)
             if match:
                 try:
-                    num = float(match.group(1).replace(".", "").replace(",", "."))
-                    factor = match.group(2)
-                    if factor and "mrd" in factor:
-                        num *= 1000
-                    umsatz = num
-                    break
+                    return BundesanzeigerScraper.normalize_number(
+                        match.group(2 if len(match.groups()) > 1 else 1)
+                    )
                 except:
-                    pass
+                    continue
+        return None
 
-        mitarbeiter_patterns = [
-            r"(\d{1,4})\s+(mitarbeiter|beschäftigte|angestellte|personen)",
-            r"es waren\s+(\d{1,4})\s+(mitarbeiter|angestellte)",
+    @staticmethod
+    def extract_mitarbeiterzahl(text: str) -> str:
+        patterns = [
+            r"beschäftigten (?:Arbeitnehmer|Mitarbeiter)[^0-9]{0,40}?(\d+)",  # klassischer Fall mit "beschäftigten"
+            r"beschäftigt(?:en)?[^0-9]{0,20}?(\d+)\s+(?:Mitarbeiter|Arbeitnehmer)",  # "beschäftigt 5 Mitarbeiter"
+            r"im Berichtsjahr[^0-9]{0,40}?(\d+)\s+(?:Mitarbeiter|Arbeitnehmer)\s+beschäftigt",  # "im Berichtsjahr ... 5 Mitarbeiter beschäftigt"
+            r"durchschnittlich(?:[^0-9]{0,15})?(\d+)\s+(?:Mitarbeiter|Arbeitnehmer)",  # "durchschnittlich 5 Mitarbeiter"
+            r"keine\s+(?:Mitarbeiter|Arbeitnehmer)\s+beschäftigt",  # "keine Mitarbeiter beschäftigt"
+            r"im (?:Geschäfts|Berichts)jahr(?:[^0-9]{0,30})?(\d+)\s+(?:Personen|Mitarbeiter|Arbeitnehmer)\s+(?:beschäftigt|tätig)",
+            r"durchschnittlich(?:[^0-9]{0,20})?(\d+)\s+(?:Mitarbeiter|Arbeitnehmer|Personen)",
+            r"die\s+durchschnittliche\s+(?:Zahl|Anzahl)[^0-9]{0,20}(\d+)",
+            r"im\s+(?:Jahresmittel|Mittel)\s+(?:waren\s+)?(\d+)\s+(?:Mitarbeiter|Arbeitnehmer)\s+(?:beschäftigt|tätig)",
+            r"(?:keine\s+(?:Mitarbeiter|Arbeitnehmer|Personen)\s+(?:beschäftigt|angestellt|tätig))",
+            r"(?:Anzahl\s+)?(?:Beschäftigte|Mitarbeiter|Arbeitnehmer)[^0-9]{0,10}[:\-]?\s*(\d+)",
+            r"Personalaufwand.*?\(\s*(\d+)\s*(?:Mitarbeiter|Arbeitnehmer)?\s*\)",
+            r"[Ø∅]?-?\s*Mitarbeiter[^0-9]{0,10}(\d+)",
         ]
-        for pattern in mitarbeiter_patterns:
-            match = re.search(pattern, text)
+
+        for pattern in patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
             if match:
-                try:
-                    mitarbeiter = int(match.group(1))
-                    break
-                except:
-                    pass
+                # Wenn „keine Mitarbeiter beschäftigt“, gib 0 zurück
+                if "keine" in match.group(0).lower():
+                    return "0"
+                return match.group(1)
+        return ""
 
-        return umsatz, mitarbeiter
+    def extract_fields_from_report(self, report_text: str) -> dict:
+        bilanzsumme = self.extract_bilanzsumme(report_text)
+        mitarbeiter = self.extract_mitarbeiterzahl(report_text)
+        return {
+            "bilanzsumme": bilanzsumme if bilanzsumme is not None else "",
+            "mitarbeiter": mitarbeiter if mitarbeiter is not None else "",
+        }
 
-    def enrich_company(self, raw_company: dict):
-        name = raw_company["name"]
-        print(f"\n--- Enriching: {name} ---")
-        entry = self.find_best_report_entry(name)
-        if not entry:
-            print("⚠️ Kein relevanter Report gefunden.")
+    def get_jahresabschluss_report(self, company_name: str):
+        try:
+            ba = bundesanzeiger.Bundesanzeiger()
+            reports = ba.get_reports(company_name)
+            if not reports or not isinstance(reports, dict):
+                print("⚠️ Keine Reports gefunden oder falsches Format.")
+                return None
+
+            for report_id, report in reports.items():
+                if "Jahresabschluss" in report.get("name", ""):
+                    print(f"📄 Jahresabschluss-Report gefunden: {report.get('name')}")
+                    return report
+            return None
+        except Exception as e:
+            print(f"❌ Fehler beim Abrufen der Reports: {e}")
             return None
 
-        text = entry.get("report", "")
-        publ_date = entry.get("date")
+    def print_jahresabschluss_info(self, company_names):
+        if isinstance(company_names, str):
+            company_names = [company_names]
+        for company_name in company_names:
+            report = self.get_jahresabschluss_report(company_name)
+            if report:
+                print("📊 Report Properties:")
+                for key, value in report.items():
+                    if key == "report":
+                        print(f"{key}")
+                    else:
+                        print(f"{key}")
+                print("================ VALUES =================")
+                print(f"Datum: {report.get('date')}")
+                print(f"Name: {report.get('name')}")
+                print(f"Company: {report.get('company')}")
+                print(f"Inhalt: {report.get('report')}")
+                print(
+                    f"Mitarbeiter + Billanzsumme: {self.extract_fields_from_report(report.get('report', ''))}\n"
+                )
+            else:
+                print(f"Kein Jahresabschluss-Report gefunden für {company_name}.")
 
-        umsatz, mitarbeiter = self.extract_financial_data(text)
+    def save_jahresabschluss_to_file(self, company_names):
+        if isinstance(company_names, str):
+            company_names = [company_names]
+        for company_name in company_names:
+            try:
+                # Add a delay to avoid rate limiting
+                time.sleep(2)
+                report = self.get_jahresabschluss_report(company_name)
+                if report:
+                    os.makedirs("files/bundesanzeiger_reports", exist_ok=True)
+                    company_name_sanitized = (
+                        str(report.get("company", ""))
+                        .replace("/", "_")
+                        .replace("\\", "_")
+                    )
+                    report_name_sanitized = (
+                        str(report.get("name", "")).replace("/", "_").replace("\\", "_")
+                    )
+                    filename = f"files/bundesanzeiger_reports/{company_name_sanitized}_{report_name_sanitized}.json"
+                    fields = self.extract_fields_from_report(report.get("report", ""))
+                    stringified_fields = {
+                        str(key): str(value) for key, value in fields.items()
+                    }
+                    with open(filename, "w", encoding="utf-8") as f:
+                        json.dump(
+                            {
+                                "company": str(report.get("company", "")),
+                                "date": str(report.get("date", "")),
+                                "name": str(report.get("name", "")),
+                                "fields": stringified_fields,
+                                "full_report": str(report.get("report", "")),
+                                "raw_report": report.get("raw_report", ""),
+                            },
+                            f,
+                            ensure_ascii=False,
+                            indent=2,
+                        )
+                    print(f"Report saved to {filename}")
+                else:
+                    print(f"Kein Jahresabschluss-Report gefunden für {company_name}.")
+            except Exception as e:
+                print(f"Error saving report to file for {company_name}: {e}")
 
-        result = {
-            "company_id": raw_company["id"],
-            "source": "bundesanzeiger",
-            "url": raw_company.get("url", ""),
-            "umsatz_mio": umsatz,
-            "mitarbeiter_min": mitarbeiter,
-            "bilanzsumme_mio": None,
-            "rechtsform": "",
-            "publikationsdatum": publ_date.strftime("%Y-%m-%d") if publ_date else "",
-            "sitz": "",
-            "branche": "",
-            "wz_code": "",
-            "geschaeftsfuehrer": "",
-            "eigentuemer": "",
-            "confidence_score": 66.7,
-        }
-        print("✅ Enriched:", result)
-        return result
-
-    def run_enrichment(self, limit=50):
-        companies = get_all_raw_companies()[:limit]
-        enriched_count = 0
-        for c in companies:
-            enriched = self.enrich_company(c)
-            if enriched:
-                insert_enriched_company(enriched)
-                enriched_count += 1
-        print(f"\n🏁 {enriched_count}/{len(companies)} erfolgreich angereichert.")
-
-    def test_enrich_deutsche_bahn(self):
-        print("\n=== TEST: Deutsche Wohnen SE ===")
-        test_company = {
-            "id": 99999,
-            "name": "Deutsche Wohnen SE",
-            "url": "https://www.deutschebahn.com",
-        }
-        enriched = self.enrich_company(test_company)
-        if enriched:
-            print("✅ Test erfolgreich.")
-        else:
-            print("❌ Test fehlgeschlagen.")
+    def store_report_data_to_db(self, company_names):
+        if isinstance(company_names, str):
+            company_names = [company_names]
+        for company_name in company_names:
+            try:
+                # Add a delay to avoid rate limiting
+                report = self.get_jahresabschluss_report(company_name)
+                # time.sleep(5)
+                if report:
+                    fields = self.extract_fields_from_report(report.get("report", ""))
+                    data = {
+                        "company_id": get_company_id_by_name(company_name),
+                        "publikationsdatum": report.get("date"),
+                        "bilanzsumme": fields.get("bilanzsumme"),
+                        "mitarbeiter": (
+                            int(fields.get("mitarbeiter"))
+                            if fields.get("mitarbeiter")
+                            and str(fields.get("mitarbeiter")).isdigit()
+                            else -1
+                        ),
+                    }
+                    insert_enriched_company(data)
+                    print(f"✅ Daten für {company_name} erfolgreich gespeichert.")
+                else:
+                    print(f"⚠️ Kein Jahresabschluss-Report gefunden für {company_name}.")
+                    continue
+            except Exception as e:
+                print(f"❌ Fehler beim Speichern der Daten für {company_name}: {e}")
 
 
-# für main.py
-def run_enrichment(limit=50):
-    enricher = BundesanzeigerEnricher()
-    enricher.run_enrichment(limit=limit)
-
-
-def test_enrich_deutsche_bahn():
-    enricher = BundesanzeigerEnricher()
-    enricher.test_enrich_deutsche_bahn()
+# Example usage:
+if __name__ == "__main__":
+    scraper = BundesanzeigerScraper()
+    # scraper.print_jahresabschluss_info("Deutsche Wohnen SE")
