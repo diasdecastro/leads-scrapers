@@ -35,7 +35,7 @@ The scraper can be run from the command line with various options.
 
 ```bash
 python main.py scrape --source gelbeseiten --query "friseur" --location "berlin" --max-entries 400 --output "results_gs.json"
-python main.py scrape --source googlemaps --query "restaurant" --location "berlin" --max-entries 15 --radius-meters 1000 --output "results_gm.json"
+python main.py scrape --source googlemaps --query "GmbH" --location "berlin" --max-entries 15 --radius-meters 1000 --output "results_gm.json"
 python main.py enrich-bundesanzeiger --limit 100
 ```
 

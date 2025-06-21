@@ -35,9 +35,9 @@ def get_connection():
     DB_CONFIG = {
         "host": os.environ.get("DB_HOST", "localhost"),
         "port": int(os.environ.get("DB_PORT", 3306)),
-        "user": os.environ.get("DB_USER", "youruser"),
+        "user": os.environ.get("DB_USER", "root"),
         "password": os.environ.get("DB_PASSWORD", "yourpassword"),
-        "database": os.environ.get("DB_NAME", "leads_scraper"),
+        "database": os.environ.get("DB_NAME", "leads_db_local"),
     }
 
     return mysql.connector.connect(**DB_CONFIG)
