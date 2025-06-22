@@ -1,1 +1,834 @@
-[]
+[
+  {
+    "name": "Hansa Preß- und Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://hansapress.de/",
+    "address": "Jacobsenweg 18, 22525 Hamburg",
+    "phone": "040543954",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "ELBE Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.elbestrom.de/",
+    "address": "Leunastraße 48, 22761 Hamburg",
+    "phone": "040200096012",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Alfons Haar Maschinenbau GmbH & Co. KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.alfons-haar.de/",
+    "address": "Fangdieckstraße 67, 22547 Hamburg",
+    "phone": "040833910",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Körber Technologies - Bergedorf GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.koerber-technologies.com/",
+    "address": "Kurt-A.-Körber-Chaussee 8, 21033 Hamburg",
+    "phone": "040725001",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "HEG Engineering GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.heg.de/",
+    "address": "Ottersbekallee 17, 20255 Hamburg",
+    "phone": "0404231110",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Lippold GmbH | Spezialist für Hydraulik & Sondermaschinenbau",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.lippold.de/",
+    "address": "Rondenbarg 11-17, 22525 Hamburg",
+    "phone": "040851800",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Maschinenfabrik T. H. Knall GmbH & Co. KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://maschinenfabrikknall.de/",
+    "address": "Worthdamm 36, 20457 Hamburg",
+    "phone": "040785759",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Schilling + Schmidt Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.schilling-schmidt.de/",
+    "address": "Vierenkamp 12, 22453 Hamburg",
+    "phone": "04055005889",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "PD-Technik Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://pd-technik.eu/",
+    "address": "Leverkusenstraße 40, 22761 Hamburg",
+    "phone": "04038038180",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Harburg-Freudenberger Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.hf-group.com/",
+    "address": "Schlachthofstraße 22, 21079 Hamburg",
+    "phone": "040771790",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "DEMA Dieter Enghausen Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://demagmbh.de/",
+    "address": "Ruwoldtweg 14, 22309 Hamburg",
+    "phone": "0406366480",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "SCHÖNAU Förderanlagen und Aufzüge GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://schoenau.com/",
+    "address": "Ottensener Str. 68, 22525 Hamburg",
+    "phone": "0405400960",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "MEIKO Deutschland GmbH Service-Center Hamburg",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.meiko.com/de-de",
+    "address": "Winsbergring 3, 22525 Hamburg",
+    "phone": "078163977110",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Alfons Haar Maschinenbau Gmbh & Co. Kg",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Hellgrundweg 112, 22525 Hamburg",
+    "phone": "",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Nordwig Maschinenbau GmbH & Co. KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.nordwig.de/",
+    "address": "Georg-Heyken-Straße 2, 21147 Hamburg",
+    "phone": "0407971790",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "FMB Finkenwerder Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://fmb-maschinenbau.de/",
+    "address": "Hein-Saß-Weg 17, 21129 Hamburg",
+    "phone": "0407458277",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "KROENERT GmbH & Co KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.kroenert.de/",
+    "address": "Schützenstraße 105, 22761 Hamburg",
+    "phone": "0408539301",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Schweißwerk und Maschinenbau Otto Schuchmacher GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Ausschläger Billdeich 32, 20539 Hamburg",
+    "phone": "0407808910",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "MacGregor Germany GmbH & Co KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.macgregor.com/",
+    "address": "Max-Born-Straße 2, 22761 Hamburg",
+    "phone": "0408533740",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Martin Schlüter Maschinenbau",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.maschinenbau-hamburg.de/",
+    "address": "Industriestraße 5, 25469 Halstenbek",
+    "phone": "0410148560",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Nauber Feinmechanik & Maschinenbau",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://nauber-feinmechanik.de/",
+    "address": "Thomas-Mann-Straße 29, 22175 Hamburg",
+    "phone": "0406401416",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "TA Roloff Technischer Apparatebau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.ta-roloff.com/",
+    "address": "Adlerhorst 5, 22459 Hamburg",
+    "phone": "0405513701",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "ZAE-AntriebsSysteme GmbH & Co KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.zae.de/",
+    "address": "Leunastraße 46, 22761 Hamburg",
+    "phone": "04053799490",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Meytech Maschinenelemente GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.meytech.de/",
+    "address": "Tarpen 13, 22419 Hamburg",
+    "phone": "04036166810",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "BMH Zerspanungs GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.bmh-zerspanung.de/",
+    "address": "Schnackenburgallee 16a, 22525 Hamburg",
+    "phone": "0406061870",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Technische Antriebselemente GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://technische-antriebselemente.de/",
+    "address": "Lademannbogen 45, 22339 Hamburg",
+    "phone": "04053889210",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "HAW Hamburg - Department Maschinenbau und Produktion",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.haw-hamburg.de/ti-mp",
+    "address": "Berliner Tor 21, 20099 Hamburg",
+    "phone": "040428758601",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "M + M Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Esplanade 23, 20354 Hamburg",
+    "phone": "",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Erich Rottmann Technik GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.rottmann-technik.de/",
+    "address": "Theodorstraße 41U, 22761 Hamburg",
+    "phone": "0404017660",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Hupe Verpackungsmaschinen",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.hupe.eu/",
+    "address": "Deelwisch 17, 22529 Hamburg",
+    "phone": "04058972522",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "BL Maschinentechnik GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.bl-maschinentechnik.de/",
+    "address": "Lohkampstraße 168A, 22523 Hamburg",
+    "phone": "01635747010",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Meinert",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.meinert-hamburg.de/",
+    "address": "Schnackenburgallee 151, 22525 Hamburg",
+    "phone": "0405558650",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "CWA GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://cwagmbh.de/",
+    "address": "Wendenstraße 379, 20537 Hamburg",
+    "phone": "04025307070",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "WMB Werkzeug- und Maschinenbau Biehl",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Kieler Str. 693, 22527 Hamburg",
+    "phone": "017655326820",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "SimpaTec Engineering GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.simpatec.com/",
+    "address": "Kieler Str. 303, 22525 Hamburg",
+    "phone": "02415652760",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Bastian Metall- und Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.bastian-metallbau.de/",
+    "address": "Hein-Saß-Stieg 9, 21129 Hamburg",
+    "phone": "0407426208",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "CREADIS GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.creadis.de/",
+    "address": "Stahltwiete 21, 22761 Hamburg",
+    "phone": "04079729648",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "AM Laserpoint Deutschland GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.amlaserpoint.com/",
+    "address": "Schützenstraße 76a, 22761 Hamburg",
+    "phone": "0408506002",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Günthner Schleiftechnik GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.guenthner-schleiftechnik.de/",
+    "address": "Schnackenburgallee 16a, 22525 Hamburg",
+    "phone": "040393554",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "MDM - Michael Dahms Maschinenbau | CNC Zerspanung",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.mdm-maschinenbau.de/",
+    "address": "Kolumbusstraße 14, 22113 Hamburg",
+    "phone": "0405273808",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Schultze Anlagentechnik GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Eversween 7, 21107 Hamburg",
+    "phone": "04075660026",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "3dpro GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.3dpro.de/",
+    "address": "Schäferstraße 16, 20357 Hamburg",
+    "phone": "040548037800",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Scholz Mechanik GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.scholz-mechanik.de/",
+    "address": "Cuxhavener Str. 42, 21149 Hamburg",
+    "phone": "0407970020",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Rudolf Rammenzweig Elektro-Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.rammenzweig-gmbh.de/",
+    "address": "Albert-Schweitzer-Ring 15, 22045 Hamburg",
+    "phone": "0406682808",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Kunststofftechnik Hans Rethwisch GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.ktr-rethwisch.de/",
+    "address": "Schnackenburgallee 42, 22525 Hamburg",
+    "phone": "04088156880",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "ZEMO Vertriebs GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.zemo-tools.de/de",
+    "address": "Ausschläger Weg 41, 20537 Hamburg",
+    "phone": "040303989100",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Nordwig Werkzeugbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.nordwig.de/",
+    "address": "Georg-Heyken-Straße 2, 21147 Hamburg",
+    "phone": "04042947470",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Hillmer Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.hillmer-maschinenbau.de/",
+    "address": "Ochsenwerder Landstraße 33, 21037 Hamburg",
+    "phone": "0407372325",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Jagenberg Converting Solutions GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.jagenberg-converting.com/",
+    "address": "Friesenweg 32a, 22763 Hamburg",
+    "phone": "",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Streckel Anlagenbau & Verfahrenstechnik GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.streckel-schrader.com/",
+    "address": "Hinschenfelder Str. 35, 22041 Hamburg",
+    "phone": "040288034010",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Corr24 GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.corr24.com/",
+    "address": "Rondenbarg 11, 22525 Hamburg",
+    "phone": "040589550",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "KHS GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.khs.com/",
+    "address": "Meiendorfer Str. 203, 22145 Hamburg",
+    "phone": "040679070",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "MAA Maschinenservice",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.maa-maschinenservice.de/",
+    "address": "Veddeler Damm 36-40, 20457 Hamburg",
+    "phone": "01718292537",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "ISY PACK GmbH | Verpackungsmaschinen",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.isypack.de/",
+    "address": "Peutestraße 53, 20539 Hamburg",
+    "phone": "040788766580",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "MIT Metelmann Ingenieurtechnik GmbH & Co. KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Lederstraße 28, 22525 Hamburg",
+    "phone": "0405576450",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "WEINMANN Emergency Medical Technology GmbH + Co. KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.weinmann-emergency.com/de/",
+    "address": "Frohbösestraße 12, 22525 Hamburg",
+    "phone": "0408818960",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "RISCHE + HERFURTH GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://polystar-hamburg.de/de/?utm_source=Google-Business-Profile&utm_medium=Branchen-und-Lieferantenkataloge&utm_content=Textlink&utm_campaign=Google-Business-Profile",
+    "address": "Kedenburgstraße 53 -59, 22041 Hamburg",
+    "phone": "0406569030",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Peters Maschinenfabrik",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Rondenbarg 9, 22525 Hamburg",
+    "phone": "",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Nagel-Maschinenbau Maschinenbau u. Feinwerktechnik",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Tarpen 40, 22419 Hamburg",
+    "phone": "0405274633",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Freundeskreis Maschinenbau und Produktion Berliner Tor eV",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.freundeskreis-berlinertor.de/index.php?id=38",
+    "address": "Berliner Tor 21, 20099 Hamburg",
+    "phone": "040428758601",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "DIE NORM Vertrieb von Norm Sonderteilen für den Maschinen & Apparatebau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Jenfelder Str. 74, 22045 Hamburg",
+    "phone": "040660046",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Friedrich Borgwardt Ing. GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.borgwardt-ing.de/",
+    "address": "Flaßbarg 101A, 22549 Hamburg",
+    "phone": "0408329570",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Werner E. Blum GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.pumpen-blum.de/",
+    "address": "Schanzenstraße 12, 20357 Hamburg",
+    "phone": "0404398534",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Plasmawerk Hamburg GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.plasmawerk.de/",
+    "address": "Tarpen 40, 22419 Hamburg",
+    "phone": "04022868820",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "P+S Maschinenbau Hermann Pfützner & Meik Pfützner GbR",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.p-s-maschinenbau.de/",
+    "address": "Am Lehmberg 10, 22143 Hamburg",
+    "phone": "0406477922",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Wärtsilä Deutschland GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.wartsila.com/germany",
+    "address": "Schlenzigstraße 6, 21107 Hamburg",
+    "phone": "040751900",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "M.A.G. Maschinen & Apparate Gesellschaft Schultz & Baensch",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Efftingestraße 28, 22041 Hamburg",
+    "phone": "",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Althom GmbH - Technische Dokumentation und Engineering Dienstleistungen",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.althom.de/",
+    "address": "Schnackenburgallee 117, 22525 Hamburg",
+    "phone": "040413079802",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "MF-hamburg Maschinen- und Anlagenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Bäckerbarg 4-7, 22889 Tangstedt",
+    "phone": "041092520250",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Fehrmann Tech Group",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.fehrmann.tech/",
+    "address": "Stenzelring 19, 21107 Hamburg",
+    "phone": "0407524630",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Grünthal Maschinenbau GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Meessen 10, 22113 Oststeinbek",
+    "phone": "04073927348",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Kneschke GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.kneschke-gmbh.de/",
+    "address": "Usedomstraße 23, 22047 Hamburg",
+    "phone": "04066977962",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Rehmus GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Überseeallee 1 Sumatrakontor, 20457 Hamburg",
+    "phone": "040228615930",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Krause & Hücker GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Tarpen 15A, 22419 Hamburg",
+    "phone": "0403984820",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Löwenstein Medical Technology GmbH + Co. KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://loewensteinmedical.com/",
+    "address": "Kronsaalsweg 40, 22525 Hamburg",
+    "phone": "040547020",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Walter Petersen GmbH Stahl- und Metallbau",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.petersen-metallbau.de/",
+    "address": "Menckesallee 19 21, 22089 Hamburg",
+    "phone": "0402094800",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "FERCHAU GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.ferchau.com/de/de/ueber-uns/niederlassungen/hamburg-city/?utm_source=google&utm_medium=organic_search&utm_campaign=local_seo",
+    "address": "Nagelsweg 33-35, 20097 Hamburg",
+    "phone": "04020944920",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Machine2B",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.machine2b.com/",
+    "address": "c/o ABC Workspaces, Georgspl. 1, 20099 Hamburg",
+    "phone": "017655281222",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Knaack & Jahn GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.knaack-jahn.de/",
+    "address": "Usedomstraße 16, 22047 Hamburg",
+    "phone": "0406698020",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Blohm+Voss B.V. & Co. KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://nvl.de/blohmvoss",
+    "address": "Hermann-Blohm- Str. 3, 20457 Hamburg",
+    "phone": "04031190",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "MÖRTZ MASCHINENBAU Henning Mörtz e.K.",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Albert-Schweitzer-Ring 21, 22045 Hamburg",
+    "phone": "0406683737",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "AM Allied Maintenance GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.alliedmaintenance.de/",
+    "address": "Neßpriel 1, 21129 Hamburg",
+    "phone": "",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "CURRAX GmbH & Co. KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://currax.net/de/",
+    "address": "Mattentwiete 8, 20457 Hamburg",
+    "phone": "040808194300",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Alfa Laval Mid Europe GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.alfalaval.de/",
+    "address": "Überseeallee 10, 20457 Hamburg",
+    "phone": "040727403",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "DESIGNA Verkehrsleittechnik GmbH (Niederlassung Hamburg)",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.designa.com/",
+    "address": "Möllner Landstraße 3, 22111 Hamburg",
+    "phone": "04081973690",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Ema Maschinen- Und Apparatebau Gmbh",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.ema-hamburg.de/",
+    "address": "b. d. Neuen Münze 12, 22145 Hamburg",
+    "phone": "",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Werner Maschinenbau GmbH & Co. KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.werner-maschinenbau.de/",
+    "address": "Werkstraße 7, 25497 Prisdorf",
+    "phone": "04101784330",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "VIDOBE Stahlbau + Schweißtechnik GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://vidobe.de/",
+    "address": "Jaffestraße 12 A, 21109 Hamburg",
+    "phone": "04031976604",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "AMD Industriemonteure GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.amd-industriemonteure.de/kontakt/hamburg/",
+    "address": "Colonnaden 5, 20354 Hamburg",
+    "phone": "04033313508",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Schütz GmbH & Co KGaA",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.schuetz.net/",
+    "address": "Pinkertweg 12, 22113 Hamburg",
+    "phone": "",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "SCHULER KONSTRUKTIONEN GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.schuler-konstruktionen.de/",
+    "address": "Tempowerkring 1, 21079 Hamburg",
+    "phone": "04025309830",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "PD-Technik Ingenieurbüro GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.pd-technik.com/",
+    "address": "Hammer Deich 26-34, 20537 Hamburg",
+    "phone": "04025304032",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "ASN Ingenieursgesellschaft mbH und Co. KG, Technische Dokumentation",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.asn-gmbh.com/",
+    "address": "Heinrichstraße 11, 22769 Hamburg",
+    "phone": "04049222540",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Bühler GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.buhlergroup.com/",
+    "address": "Hindenburgstraße 167, 22297 Hamburg",
+    "phone": "",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "WEISSENBURG Industrie- Technik Maschinenbau GmbH & Co. KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.weissenburg-wit.de/",
+    "address": "Langenkamp 12, 22880 Wedel",
+    "phone": "04103800780",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Noratec Hamburg GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.noratec.eu/",
+    "address": "Lademannbogen 45A, 22339 Hamburg",
+    "phone": "",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "L M G - Luckmann Montage GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "",
+    "address": "Obergeorgswerder Deich 26, 21109 Hamburg",
+    "phone": "040785003",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Feinwerk Hamburg",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.feinwerk.hamburg/",
+    "address": "Rudorffweg 15-17, 21031 Hamburg",
+    "phone": "0407309260",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Dustcontrol GmbH - Büro Hamburg",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.dustcontrol.de/",
+    "address": "Poppenbütteler Bogen 28, 22399 Hamburg",
+    "phone": "0703297560",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Finalin GmbH & Co. KG",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://www.mankiewicz.com/",
+    "address": "Georg-Wilhelm-Straße 189, 21107 Hamburg",
+    "phone": "040751030",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "Polinski Werner Maschinenbau",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.polinski-hamburg.de/",
+    "address": "Rudorffweg 11, 21031 Hamburg",
+    "phone": "0407394251",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "E.M.A. Maschinen- und Apparatebau G.m.b.H.",
+    "search_query": "Maschinenbau GmbH",
+    "url": "http://ema-hamburg.de/",
+    "address": "Braaker Bogen 1-3, 22145 Braak",
+    "phone": "0406783044",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "HH Plus GmbH",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.hh-plus.com/",
+    "address": "Industriestraße 114, 21107 Hamburg",
+    "phone": "04057308091",
+    "source": "google.com/maps"
+  },
+  {
+    "name": "️ DMI Wolfgang Drechsler GmbH | Partner für Industrie & Schifffahrt | Hamburg",
+    "search_query": "Maschinenbau GmbH",
+    "url": "https://www.dmi-drechsler.de/",
+    "address": "Hohe-Schaar-Straße 40, 21107 Hamburg",
+    "phone": "0402841100",
+    "source": "google.com/maps"
+  }
+]
