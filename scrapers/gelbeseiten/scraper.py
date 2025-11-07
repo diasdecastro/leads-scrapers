@@ -1,9 +1,12 @@
+from datetime import datetime
 import logging
 import base64
 from typing import List, Dict, Optional
 
 from config.browser import BrowserManager
 from .config import GelbeseitenConfig
+
+# TODO: Stop processing further entries once max_entries is reached
 
 # Configure logging
 logging.basicConfig(
@@ -15,26 +18,22 @@ logger = logging.getLogger(__name__)
 class GelbeseitenScraper:
     """Scraper for Gelbeseiten.de business listings."""
 
-    def __init__(
-        self,
-        requests_per_minute: int = GelbeseitenConfig.REQUESTS_PER_MINUTE,
-        proxy: Optional[str] = None,
-    ):
-        self.requests_per_minute = requests_per_minute
+    def __init__(self, proxy: Optional[str] = None):
         self.proxy = proxy
 
     def scrape(
         self,
-        query: str = GelbeseitenConfig.DEFAULT_QUERY,
-        location: str = GelbeseitenConfig.DEFAULT_CITY,
+        query: str = GelbeseitenConfig.DEFAULT_VALUES["query"],
+        location: str = GelbeseitenConfig.DEFAULT_VALUES["location"],
         max_entries: Optional[int] = None,
+        requests_per_minute=30,
     ) -> List[Dict]:
         """Scrape business listings from Gelbeseiten.de."""
-        base_url = "https://www.gelbeseiten.de"
+        base_url = GelbeseitenConfig.BASE_URL
         url = f"{base_url}/{query}/{location}"
         results = []
 
-        with BrowserManager(self.requests_per_minute, self.proxy) as browser:
+        with BrowserManager(requests_per_minute, self.proxy) as browser:
             page = browser.get_page()
 
             # Load initial page
@@ -70,12 +69,19 @@ class GelbeseitenScraper:
 
             # First extract initial entries
             initial_results = self._extract_entries(page)
+
+            if max_entries is not None and len(initial_results) > max_entries:
+                initial_results = initial_results[:max_entries]
+                logger.info(
+                    f"Limited initial results to {max_entries} entries as requested"
+                )
+
             results.extend(initial_results)
             logger.info(f"Extracted {len(initial_results)} initial entries")
 
             # Calculate how many additional entries we need
-            remaining_entries = max_entries - initial_entries
-            current_position = initial_entries
+            remaining_entries = max_entries - len(initial_results)
+            current_position = len(initial_results)
             ENTRIES_PER_REQUEST = 10  # Gelbeseiten only allows 10 entries per request
 
             # Load more entries in batches
@@ -211,7 +217,7 @@ class GelbeseitenScraper:
                     phone = phone_elem ? phone_elem.textContent.trim() : '';
                 } catch {}
                 return {
-                    name,
+                    company_name: name,
                     search_query,
                     url: url_decoded,
                     address,
@@ -281,15 +287,20 @@ class GelbeseitenScraper:
                 phone = phone_elem.text_content().strip() if phone_elem else ""
 
                 company = {
-                    "name": name.strip(),
-                    "search_query": page.url.split("/")[-2].capitalize(),
-                    "url": url_decoded,
+                    "metadata": {
+                        "search_query": page.url.split("/")[-2].capitalize(),
+                        "datetime": datetime.now().isoformat(),
+                    },
+                    "company_name": name.strip(),
+                    "company_website": url_decoded,
                     "address": address,
                     "phone": phone,
                     "source": "gelbeseiten.de",
                 }
                 results.append(company)
-                logger.info(f"Processed entry {idx}/{total_entries}: {company['name']}")
+                logger.info(
+                    f"Processed entry {idx}/{total_entries}: {company['company_name']}"
+                )
             except Exception as e:
                 logger.error(f"Error processing entry {idx}/{total_entries}: {e}")
 

@@ -1,178 +1,130 @@
 import mysql.connector
 import os
-
-# TODO: Denk darüber nach, ob die DB-Konfiguration eine Klasse sein sollte,
-
-COLUMNS = {
-    "name": "VARCHAR(255)",
-    "search_query": "VARCHAR(255)",
-    "url": "VARCHAR(512)",
-    "address": "VARCHAR(255)",
-    "phone": "VARCHAR(64)",
-    "source": "VARCHAR(100)",
-}
-
-ENRICHED_COLUMNS = {
-    "company_id": "INT PRIMARY KEY",  # FK to raw_companies.id
-    "url": "VARCHAR(512)",
-    "mitarbeiter": "INT",
-    "umsatz": "DECIMAL(10,2)",
-    "bilanzsumme": "DECIMAL(10,2)",
-    "rechtsform": "VARCHAR(50)",
-    "publikationsdatum": "DATE",
-    "sitz": "VARCHAR(100)",
-    "branche": "VARCHAR(255)",
-    "wz_code": "VARCHAR(20)",
-    "geschaeftsfuehrer": "TEXT",
-    "eigentuemer": "TEXT",
-    "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-    "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
-}
+from typing import Dict, Any, Optional
 
 
-def get_connection():
-    DB_CONFIG = {
-        "host": os.environ.get("DB_HOST", "localhost"),
-        "port": int(os.environ.get("DB_PORT", 3306)),
-        "user": os.environ.get("DB_USER", "root"),
-        "password": os.environ.get("DB_PASSWORD", "yourpassword"),
-        "database": os.environ.get("DB_NAME", "leads_db_local"),
-    }
+class DatabaseManager:
+    """Database manager class for handling MySQL operations with auto table creation."""
 
-    return mysql.connector.connect(**DB_CONFIG)
-
-
-def create_raw_companies_table():
-    conn = get_connection()
-    cursor = conn.cursor()
-    columns_sql = ",\n".join([f"{col} {typ}" for col, typ in COLUMNS.items()])
-    cursor.execute(
-        f"""
-        CREATE TABLE IF NOT EXISTS raw_companies (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            {columns_sql},
-            UNIQUE KEY unique_business (name, address)
-        )
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         """
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
+        Initialize the DatabaseManager.
 
-
-def insert_raw_company(business, conn=None, cursor=None):
-    close_conn = False
-    if conn is None or cursor is None:
-        conn = get_connection()
-        cursor = conn.cursor()
-        close_conn = True
-    create_raw_companies_table()
-    keys = list(COLUMNS.keys())
-    values = [business.get(k) for k in keys]
-    placeholders = ", ".join(["%s"] * len(keys))
-    columns_sql = ", ".join(keys)
-    sql = f"""
-        INSERT IGNORE INTO raw_companies ({columns_sql})
-        VALUES ({placeholders})
-    """
-    cursor.execute(sql, values)
-    if close_conn:
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-
-def get_all_raw_companies():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM raw_companies")
-    results = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return results
-
-
-def create_enriched_companies_table():
-    conn = get_connection()
-    cursor = conn.cursor()
-    columns_sql = ",\n".join([f"{col} {typ}" for col, typ in ENRICHED_COLUMNS.items()])
-    cursor.execute(
-        f"""
-        CREATE TABLE IF NOT EXISTS enriched_companies (
-            {columns_sql},
-            CONSTRAINT fk_enriched_company FOREIGN KEY (company_id)
-                REFERENCES raw_companies(id)
-                ON DELETE CASCADE
-        )
+        Args:
+            config: Optional database configuration. If None, uses environment variables.
         """
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
+        if config is None:
+            self.config = {
+                "host": os.environ.get("DB_HOST", "localhost"),
+                "port": int(os.environ.get("DB_PORT", 3306)),
+                "user": os.environ.get("DB_USER", "root"),
+                "password": os.environ.get("DB_PASSWORD", "yourpassword"),
+                "database": os.environ.get("DB_NAME", "leads_db_local"),
+            }
+        else:
+            self.config = config
 
+    def get_connection(self):
+        """Get a database connection."""
+        return mysql.connector.connect(**self.config)
 
-def insert_enriched_company(enrichment, conn=None, cursor=None):
-    close_conn = False
-    if conn is None or cursor is None:
-        conn = get_connection()
+    def table_exists(self, cursor, table_name: str) -> bool:
+        """Check if a table exists in the database."""
+        cursor.execute(
+            """
+            SELECT COUNT(*) 
+            FROM information_schema.tables 
+            WHERE table_schema = DATABASE() 
+            AND table_name = %s
+        """,
+            (table_name,),
+        )
+        return cursor.fetchone()[0] > 0
+
+    def infer_mysql_type(self, value) -> str:
+        """Infer MySQL column type from Python value."""
+        if value is None:
+            return "TEXT"
+        elif isinstance(value, bool):
+            return "BOOLEAN"
+        elif isinstance(value, int):
+            return "INT"
+        elif isinstance(value, float):
+            return "DECIMAL(15,2)"
+        elif isinstance(value, str):
+            if len(value) <= 255:
+                return "VARCHAR(255)"
+            else:
+                return "TEXT"
+        elif isinstance(value, (dict, list)):
+            return "JSON"
+        else:
+            return "TEXT"
+
+    def create_table_from_data(self, cursor, table_name: str, data: dict):
+        """Create a table based on the data dictionary structure."""
+        columns = []
+
+        columns.append("id INT AUTO_INCREMENT PRIMARY KEY")
+
+        for key, value in data.items():
+            column_type = self.infer_mysql_type(value)
+            columns.append(f"`{key}` {column_type}")
+
+        columns.append("created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+        columns.append(
+            "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+        )
+
+        sql = f"CREATE TABLE `{table_name}` ({', '.join(columns)})"
+        cursor.execute(sql)
+
+    def store_data(self, table: str, data: dict):
+        """Store data in the specified table, creating the table if it doesn't exist."""
+        conn = self.get_connection()
         cursor = conn.cursor()
-        close_conn = True
 
-    create_enriched_companies_table()
+        try:
+            if not self.table_exists(cursor, table):
+                print(f"Table '{table}' does not exist. Creating it...")
+                self.create_table_from_data(cursor, table, data)
+                print(f"Table '{table}' created successfully.")
 
-    keys = list(ENRICHED_COLUMNS.keys())
-    # Remove TIMESTAMP-Felder (werden automatisch gesetzt)
-    keys = [
-        k
-        for k in keys
-        if not k.startswith("created_at") and not k.startswith("updated_at")
-    ]
-    values = [enrichment.get(k) for k in keys]
-    placeholders = ", ".join(["%s"] * len(keys))
-    columns_sql = ", ".join(keys)
+            placeholders = ", ".join(["%s"] * len(data))
+            columns = ", ".join([f"`{col}`" for col in data.keys()])
+            sql = f"INSERT INTO `{table}` ({columns}) VALUES ({placeholders})"
 
-    sql = f"""
-        INSERT INTO enriched_companies ({columns_sql})
-        VALUES ({placeholders})
-        ON DUPLICATE KEY UPDATE
-            {", ".join([f"{k}=VALUES({k})" for k in keys if k != "company_id"])}
-    """
-    cursor.execute(sql, values)
-    if close_conn:
-        conn.commit()
-        cursor.close()
-        conn.close()
+            cursor.execute(sql, list(data.values()))
+            conn.commit()
 
+        except Exception as e:
+            conn.rollback()
+            print(f"Error storing data in table '{table}': {e}")
+            raise
+        finally:
+            cursor.close()
+            conn.close()
 
-def get_company_name_by_id(company_id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM raw_companies WHERE id = %s", (company_id,))
-    result = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if result:
-        return result[0]
-    return None
+    def execute_query(
+        self, query: str, params: Optional[tuple] = None, fetch_all: bool = True
+    ):
+        """Execute a custom query and return results."""
+        conn = self.get_connection()
+        cursor = conn.cursor(dictionary=True)
 
+        try:
+            cursor.execute(query, params or ())
 
-def get_company_id_by_name(company_name):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM raw_companies WHERE name = %s", (company_name,))
-    result = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if result:
-        return result[0]
-    return None
+            if query.strip().upper().startswith(("SELECT", "SHOW", "DESCRIBE")):
+                return cursor.fetchall() if fetch_all else cursor.fetchone()
+            else:
+                conn.commit()
+                return cursor.rowcount
 
-
-def get_all_company_names():
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, name FROM raw_companies")
-    results = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return [{"id": row[0], "name": row[1]} for row in results]
+        except Exception as e:
+            conn.rollback()
+            print(f"Error executing query: {e}")
+            raise
+        finally:
+            cursor.close()
+            conn.close()

@@ -43,6 +43,9 @@ class BrowserManager:
             },
             proxy=self.proxy,
             extra_http_headers=ScraperConfig.BROWSER_HEADERS,
+            locale="de-DE",
+            geolocation={"longitude": 13.4050, "latitude": 52.5200},  # Berlin
+            permissions=["geolocation"],
         )
         logger.info(f"Created new context with user agent: {user_agent}")
         # Apply stealth to the context's page

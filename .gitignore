@@ -55,3 +55,6 @@ config.local.py
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Data
+scrapers/**/data/

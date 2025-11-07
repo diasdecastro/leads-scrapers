@@ -1,24 +1,28 @@
-# Lead Scraper
+# Playwright Scrapers Collection
 
-A Python-based web scraping tool that uses Playwright to extract business listings from various business directories. Currently supports scraping from Gelbeseiten.de and Google Maps.
+A collection of web scrapers built with Playwright (mostly), featuring scraping tools with a unified CLI interface.
+
+## Overview
+
+This project provides a robust collection of web scrapers powered by Playwright, designed for various data extraction needs. Each scraper is built with stealth capabilities, rate limiting, and browser management features.
 
 ## Features
 
-- Automated web scraping using Playwright
-- Rate limiting and request management
-- User agent rotation
-- Proxy support
-- Configurable batch sizes
-- JSON output format
-- Detailed logging
-- Command-line interface
+- **CLI Interface**: Easy-to-use command-line interface for running scrapers
+- **Stealth Mode**: Built-in stealth capabilities to avoid detection
+- **Rate Limiting**: Configurable request rate limiting
+- **User Agent Rotation**: Automatic user agent rotation for better anonymity
+- **Proxy Support**: Optional proxy configuration
+- **Browser Management**: Intelligent browser context management and rotation
+- **Database Integration**: SQLite database for persistent data storage
+- **Data Enrichment**: Multiple enrichment strategies for comprehensive business data
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/lead-scraper.git
-cd lead-scraper
+git clone <repository-url>
+cd leads-scrapers
 ```
 
 2. Install dependencies:
@@ -26,104 +30,148 @@ cd lead-scraper
 pip install -r requirements.txt
 ```
 
+3. Install Playwright browsers:
+```bash
+playwright install chromium
+```
+
 ## Usage
 
 ### Command Line Interface
 
-The scraper can be run from the command line with various options.  
-**You must now specify the source with `--source` or `-s`:**
+The project uses an interactive CLI architecture where each scraper defines its own questionary-based interface:
 
 ```bash
-python main.py scrape --source gelbeseiten --query "friseur" --location "berlin" --max-entries 400 --output "results_gs.json"
-python main.py scrape --source googlemaps --query "GmbH" --location "berlin" --max-entries 15 --radius-meters 1000 --output "results_gm.json"
-python main.py enrich-bundesanzeiger --limit 100
+# Interactive CLI menu
+python cli.py
 ```
 
-Available options:
-- `scrape`: Scrape business listings (default command)
-- `enrich-bundesanzeiger`: Enrich companies in the database with Bundesanzeiger API data
-- `--source`, `-s`: Source to scrape from (`gelbeseiten` or `googlemaps`, default: `gelbeseiten`)
-- `--query`, `-q`: Search term (default from source config)
-- `--location`: Location to search in
-- `--radius-meters`: Search radius in meters (Google Maps only, default from config)
-- `--max-entries`, `-m`: Maximum number of entries to fetch (default: all available)
-- `--output`, `-o`: Output JSON file path (default: results.json)
-- `--proxy`, `-p`: Proxy server to use (default: none)
-- `--requests-per-minute`, `-r`: Rate limit in requests per minute (default: source-specific)
-- `--limit`: (for `enrich-bundesanzeiger`) Number of companies to enrich (default: 50)
+#### CLI Architecture
 
-### Python API
+- **Main CLI (`cli.py`)**: Interactive scraper selection with questionary prompts
+- **Scraper-specific CLIs**: Each scraper defines its own parameter collection interface
+- **Static Configuration**: All scrapers are explicitly defined in the main CLI
+- **Modular Design**: Easy to add new scrapers by updating the static list
 
-You can also use the scraper in your Python code:
+### Available Scrapers
 
-```python
-from playwright_scrapers.scrapers.gelbeseiten.scraper import GelbeseitenScraper
+| Scraper | Description | Status | Documentation |
+|---------|-------------|--------|---------------|
+| Gelbeseiten | Scrapes business listings from Gelbeseiten.de | ✅ Active | [README](scrapers/gelbeseiten/README.md) |
+| Google Maps | Scrapes business listings from Google Maps | ✅ Active | [README](scrapers/googlemaps/README.md) |
+| Imprint Data | Extracts company data from German imprint pages | ⚠️ Outdated | [README](scrapers/imprint_data/README.md) |
+| Bundesanzeiger API | Enriches companies with financial data from Bundesanzeiger | ⚠️ Outdated | [README](scrapers/bundesanzeiger/README.md) |
+| [Add your scrapers here] | | | |
 
-# Initialize the scraper
-scraper = GelbeseitenScraper(proxy="http://your-proxy:8080")  # proxy is optional
+> **Note**: All scrapers support rate limiting, proxy usage, and stealth features through the unified browser management system.
 
-# Run the scraper
-results = scraper.scrape(
-    query="friseur",
-    city="berlin",
-    max_entries=100  # optional, will fetch all available if not specified
-)
+### Configuration
 
-# Process the results
-for entry in results:
-    print(f"Business: {entry['name']}")
+Configure scraper behavior through environment variables or configuration files:
+
+- `HEADLESS`: Run browser in headless mode (default: True)
+- `REQUESTS_PER_MINUTE`: Rate limiting (default: 30)
+- `VIEWPORT_WIDTH`: Browser viewport width (default: 1920)
+- `VIEWPORT_HEIGHT`: Browser viewport height (default: 1080)
+
+## Architecture
+
+### Core Components
+
+- **BrowserManager**: Handles browser lifecycle, context rotation, and stealth features
+- **RateLimiter**: Controls request frequency to avoid being blocked
+- **ScraperConfig**: Centralized configuration management
+- **CLI**: Command-line interface for easy scraper execution
+
+### Browser Features
+
+- Automatic user agent rotation
+- Stealth mode to bypass basic bot detection
+- Context refresh at configurable intervals
+- Geolocation spoofing (Berlin, Germany)
+- Custom headers and locale settings
+
+## Development
+
+### Adding New Scrapers
+
+Follow these steps to add a new scraper, using the Google Maps and Gelbeseiten scrapers as reference examples:
+
+1. **Create the scraper directory structure**:
+```
+scrapers/[scraper_name]/
+├── __init__.py          # Package marker
+├── scraper.py           # Main scraping logic
+├── config.py            # Scraper configuration
+├── cli.py               # CLI interface
+├── README.md            # Scraper documentation
+└── data/                # Output data directory
 ```
 
-## Project Structure
+2. **Implement the core scraper** (`scraper.py`):
+   - Create a scraper class that handles data extraction
+   - Use the BrowserManager for stealth and browser management
+   - Implement proper error handling and logging
+   - Return structured data (typically JSON)
+
+3. **Create configuration** (`config.py`):
+   - Define INPUT_PARAMS for CLI prompts
+   - Set scraper-specific settings
+   - Example: `INPUT_PARAMS = [("search_term", "Search term"), ("location", "Location")]`
+
+4. **Implement CLI interface** (`cli.py`):
+   - Inherit from `ScraperCLI` from `config.base_cli`
+   - Implement required properties: `name`, `description`
+   - Implement `get_cli_params()` for user input collection
+   - Implement `build_command()` for command generation
+   - See `scrapers/googlemaps/cli.py` or `scrapers/gelbeseiten/cli.py` as examples
+
+5. **Add to main CLI**: Import and add your scraper to the static list in `cli.py`
+
+6. **Create documentation**: Add a comprehensive README.md explaining your scraper
+
+
+### Project Structure
+
+The project follows a modular architecture designed for scalability and maintainability:
 
 ```
-lead-scraper/
-├── config/
-│   ├── browser.py         # Browser management and configuration
-│   ├── browser_config.py  # Browser-specific settings
-│   └── config.py         # General configuration
-├── playwright_scrapers/
-│   └── scrapers/
-│       ├── gelbeseiten/
-│       │   ├── config.py      # Gelbeseiten-specific configuration
-│       │   └── scraper.py     # Gelbeseiten scraper implementation
-│       └── googlemaps/
-│           ├── config.py      # Google Maps-specific configuration
-│           └── scraper.py     # Google Maps scraper implementation
-├── main.py                   # Command-line interface
-└── requirements.txt          # Project dependencies
+├── cli.py                  # Main entry point - interactive scraper selection
+├── config/                 # Core infrastructure components
+│   ├── browser.py          # Browser management, stealth, and rotation
+│   ├── config.py           # Global configuration and settings
+│   ├── rate_limiter.py     # Request rate limiting
+│   └── base_cli.py         # Base classes for CLI interfaces
+├── scrapers/               # Individual scraper modules
+│   └── [scraper_name]/     # Each scraper has its own directory
+│       ├── scraper.py      # Core scraping logic
+│       ├── config.py       # Scraper-specific configuration
+│       ├── cli.py          # Interactive CLI interface
+│       ├── README.md       # Scraper documentation
+│       └── data/           # Output data storage
+└── utils/                  # Shared utilities
+    ├── db.py              # Database operations
+    ├── logging.py         # Logging configuration
+    └── store_data_json_helper.py  # Data persistence helpers
 ```
 
-## Configuration
+**Key Design Principles**:
+- **Modular**: Each scraper is self-contained with its own configuration and CLI
+- **Unified Infrastructure**: Shared browser management, rate limiting, and utilities
+- **CLI-First**: Interactive questionary-based interfaces for ease of use
+- **Extensible**: Simple structure for adding new scrapers
 
-The scraper behavior can be customized through various configuration files:
+## Requirements
 
-### Browser Configuration (config/browser_config.py)
-- User agents for rotation
-- Browser headers
-- Viewport settings
-- Rate limiting parameters
+- Python 3.8+
+- Playwright
+- playwright-stealth
+- Additional dependencies in requirements.txt
 
-### Scraper Configuration (playwright_scrapers/scrapers/gelbeseiten/config.py)
-- Default search parameters
-- Site-specific selectors
-- Request settings
 
-## Output Format
+## Disclaimer
 
-The scraper outputs JSON files with the following structure:
-
-```json
-[
-  {
-    "name": "Business Name",
-    "id": "unique-identifier",
-    "position": 1,
-    "industry": "Search Query"
-  },
-  // ... more entries
-]
-```
+This tool is for educational and research purposes. Always respect robots.txt files and website terms of service. Use responsibly and in accordance with applicable laws and regulations.
 
 ## Error Handling
 
@@ -134,51 +182,3 @@ The scraper includes comprehensive error handling and logging:
 - Invalid responses
 
 All errors are logged with appropriate context for debugging.
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Upcoming: Google Maps Scraper
-
-We are planning to add a Google Maps scraper alongside the existing Gelbeseiten scraper. This will involve:
-
-- Adding a new scraper under `playwright_scrapers/scrapers/googlemaps/`.
-- Supporting Google Maps-specific configuration and arguments.
-- Updating `main.py` to allow selecting which scraper to use (e.g., via a `--source` argument).
-- Each scraper may require different CLI arguments (e.g., Google Maps may need API keys, radius, etc.).
-
-**Note:** The CLI interface will be updated to support multiple sources and their specific parameters in a user-friendly way.
-
-# Interessante Queries
-| Branche                       | Begründung                                         |
-| ----------------------------- | -------------------------------------------------- |
-| **Steuerberater**             | oft mehrere Angestellte, gut verdienend            |
-| **Hausverwaltungen**          | viele Objekte = hoher Umsatz                       |
-| **Pflegedienste**             | Personalintensiv, oft >20 MA                       |
-| **Physiotherapie-Zentren**    | >10 MA häufig bei großen Praxen                    |
-| **Autohäuser & Werkstätten**  | ab 2 Hebebühnen meist >10 MA                       |
-| **Bauunternehmen**            | Umsatz meist >2 Mio bei >3 Baustellen gleichzeitig |
-| **Sanitär & Heizung**         | viele Installateure = viele MA                     |
-| **Rechtsanwälte (Kanzleien)** | große Kanzleien mit mehreren Anwälten              |
-| **Logistik / Speditionen**    | fast immer mittelständisch                         |
-| **IT-Systemhäuser**           | Software, Netzwerke, Wartung = >10 MA üblich       |
-| **Maschinenbau / Produktion** | hohe Fixkosten → hoher Umsatz                      |
-
-## Enrichment with Bundesanzeiger API
-
-You can enrich your scraped company data with official information from the Bundesanzeiger using:
-
-```bash
-python main.py enrich-bundesanzeiger --limit 100
-```
-
-This will attempt to match and enrich up to 100 companies in your database with data such as revenue, employee count, and more, using the Bundesanzeiger API.
