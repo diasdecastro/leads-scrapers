@@ -14,8 +14,6 @@ This project provides a robust collection of web scrapers powered by Playwright,
 - **User Agent Rotation**: Automatic user agent rotation for better anonymity
 - **Proxy Support**: Optional proxy configuration
 - **Browser Management**: Intelligent browser context management and rotation
-- **Database Integration**: SQLite database for persistent data storage
-- **Data Enrichment**: Multiple enrichment strategies for comprehensive business data
 
 ## Installation
 
